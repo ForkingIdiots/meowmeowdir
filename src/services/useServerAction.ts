@@ -1,5 +1,7 @@
-export const useServerAction = (actionName: string) => {
-    const r = async (payload?: any) => await fetch(`/api/getServerAction?actionName=${actionName}`, {
+import { ServerAction, ServerActionName } from "./action"
+
+export const useServerAction = <K extends ServerActionName>(actionName: K) => {
+    const r = async (payload?: Parameters<ServerAction[K]>[0]) => await fetch(`/api/getServerAction?actionName=${actionName}`, {
         method: 'POST',
         body: JSON.stringify(payload ?? {})
     })
