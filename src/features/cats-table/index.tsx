@@ -1,17 +1,12 @@
-'use client'
-import { Button } from "@/components/Button"
-import { useServerAction } from "@/services/useServerAction"
+'use server'
+import { serverAction } from "@/services/action"
 
-export const CatsTable = () => {
+export const CatsTable = async () => {
 
-    const { fetch } = useServerAction('getCats')
-    const handleClick = async () => {
-        console.log('click')
-        await fetch({})
-    }
+    const { data } = await serverAction['getCats']({ limit: 1000 })
     return (
         <div className="">
-            <Button onClick={() => handleClick()}> fetch </Button>
+            {JSON.stringify(data)}
         </div>
     )
 }

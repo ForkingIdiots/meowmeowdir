@@ -1,10 +1,9 @@
-import { paths } from "@/schema";
-import { getCat, getCats } from "./loader";
-import { FetchOptions, FetchResponse } from "openapi-fetch";
+import { getCat, getCatById, getCats } from "./loader";
 
 export const serverAction = {
     'getCat': getCat,
-    'getCats': getCats
+    'getCats': getCats,
+    'getCatById': getCatById
 } as const
 export type ServerAction = typeof serverAction
 export type ServerActionName = keyof ServerAction

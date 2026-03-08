@@ -7,6 +7,9 @@ export const getCat = async () => {
 
 type GetCatsParams = paths['/api/cats']['get']['parameters']['query']
 export const getCats = async (query?: GetCatsParams) => {
-    console.log('query', query)
     return await api.GET('/api/cats', { params: { query } })
+}
+
+export const getCatById = async (id: string) => {
+    return await api.GET('/cat/{id}', { params: { path: { id } } })
 }
