@@ -4,6 +4,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import { QueryProvider } from "@/providers/query-provider";
+import { NavMenu } from "@/components/NavMenu";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -51,7 +52,12 @@ export default function RootLayout({
               }}
             >
               <QueryProvider>
-                {children}
+                <div className="min-h-screen">
+                  <NavMenu />
+                  <main className="p-6">
+                    {children}
+                  </main>
+                </div>
               </QueryProvider>
             </ConfigProvider>
           </AntdRegistry>
