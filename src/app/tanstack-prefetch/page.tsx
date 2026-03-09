@@ -18,11 +18,11 @@ export default function TanstackPrefetchPage() {
     <div className="max-w-5xl mx-auto p-6">
       <Flex gap={16} vertical>
         <div>
-          <Title level={2}>TanStack Query + Server Prefetch</Title>
+          <Title level={2}>TanStack Query + Server Prefetch (Non-Awaited)</Title>
           <Text type="secondary">
-            Same slow data as the streaming demo, but prefetched on the server using
-            TanStack Query. Data is dehydrated and hydrated on the client — no loading
-            spinners, instant interactivity, and client-side refetch works after hydration.
+            Prefetches are fired on the server but NOT awaited. The pending promises are
+            dehydrated and passed to the client, where each useSuspenseQuery suspends
+            independently inside its own Suspense boundary. Sections stream in as they resolve.
           </Text>
         </div>
 
@@ -32,19 +32,17 @@ export default function TanstackPrefetchPage() {
           </h3>
           <ul className="list-disc pl-5 space-y-1 text-blue-700">
             <li>
-              <strong>Streaming (Suspense):</strong> Server sends HTML chunks as each section
-              resolves. Progressive UX. But breaks on AWS Amplify (buffered).
+              <strong>Awaited prefetch:</strong> <code>await Promise.all([prefetchQuery(...)])</code> —
+              blocks until all queries finish, sends everything at once.
             </li>
             <li>
-              <strong>Prefetch (TanStack):</strong> Server fetches all data, dehydrates it,
-              and sends a single complete HTML response. Works everywhere, but user waits for
-              the slowest query.
+              <strong>Non-awaited prefetch (this page):</strong> <code>void prefetchQuery(...)</code> —
+              starts fetches on the server, dehydrates pending promises, client suspends per-section.
             </li>
             <li>
-              <strong>Prefetch + Suspense (this page):</strong> Wraps the prefetch in a
-              Suspense boundary so the shell streams instantly, then the prefetched block
-              arrives once all queries resolve. Best of both worlds — but still limited by the
-              slowest query within the boundary.
+              <strong>Result:</strong> Each section streams in independently as its query resolves.
+              Fast (0.5s) → Medium (2s) → Slow (5s) → Very Slow (10s). Same progressive UX as
+              server-side Suspense streaming, but with TanStack Query cache + refetch on the client.
             </li>
           </ul>
         </div>
@@ -73,25 +71,24 @@ export default function TanstackPrefetchPage() {
 async function PrefetchedSections() {
   const queryClient = new QueryClient();
 
-  // Prefetch all sections in parallel on the server
-  await Promise.all([
-    queryClient.prefetchQuery({
-      queryKey: slowDataKeys.section("fast"),
-      queryFn: () => fetchSlowData(10, 500, "Fast"),
-    }),
-    queryClient.prefetchQuery({
-      queryKey: slowDataKeys.section("medium"),
-      queryFn: () => fetchSlowData(50, 2000, "Medium"),
-    }),
-    queryClient.prefetchQuery({
-      queryKey: slowDataKeys.section("slow"),
-      queryFn: () => fetchSlowData(100, 5000, "Slow"),
-    }),
-    queryClient.prefetchQuery({
-      queryKey: slowDataKeys.section("very-slow"),
-      queryFn: () => fetchSlowData(150, 10000, "Very Slow"),
-    }),
-  ]);
+  // Start prefetches WITHOUT awaiting — promises are passed to the client
+  // Each useSuspenseQuery on the client will suspend until its query resolves
+  void queryClient.prefetchQuery({
+    queryKey: slowDataKeys.section("fast"),
+    queryFn: () => fetchSlowData(10, 500, "Fast"),
+  });
+  void queryClient.prefetchQuery({
+    queryKey: slowDataKeys.section("medium"),
+    queryFn: () => fetchSlowData(50, 2000, "Medium"),
+  });
+  void queryClient.prefetchQuery({
+    queryKey: slowDataKeys.section("slow"),
+    queryFn: () => fetchSlowData(100, 5000, "Slow"),
+  });
+  void queryClient.prefetchQuery({
+    queryKey: slowDataKeys.section("very-slow"),
+    queryFn: () => fetchSlowData(150, 10000, "Very Slow"),
+  });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

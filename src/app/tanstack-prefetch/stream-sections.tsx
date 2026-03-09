@@ -1,10 +1,11 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { slowDataKeys } from "./keys";
-import { fetchSlowData, type SlowDataItem } from "./fetch-slow-data";
+import { type SlowDataItem } from "./fetch-slow-data";
 import { Flex } from "@/components/Flex";
 import { Button } from "@/components/Button";
+import { Suspense } from "react";
 
 function DataSection({
   queryKey,
@@ -15,7 +16,7 @@ function DataSection({
   title: string;
   color: string;
 }) {
-  const { data, isFetching, dataUpdatedAt, refetch } = useQuery<SlowDataItem[]>({
+  const { data, isFetching, dataUpdatedAt, refetch } = useSuspenseQuery<SlowDataItem[]>({
     queryKey,
   });
 
@@ -69,6 +70,20 @@ function DataSection({
   );
 }
 
+function SectionSkeleton({ label }: { label: string }) {
+  return (
+    <div className="border-2 border-gray-200 rounded-2xl p-4 animate-pulse">
+      <div className="h-6 bg-gray-200 rounded w-1/2 mb-2" />
+      <p className="text-sm text-gray-400">{label} — Loading...</p>
+      <div className="mt-3 space-y-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-4 bg-gray-200 rounded" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function StreamSections() {
   const queryClient = useQueryClient();
 
@@ -84,26 +99,37 @@ export function StreamSections() {
         </Button>
       </div>
 
-      <DataSection
-        queryKey={[...slowDataKeys.section("fast")]}
-        title="Fast Section (500ms delay, 10 items)"
-        color="green"
-      />
-      <DataSection
-        queryKey={[...slowDataKeys.section("medium")]}
-        title="Medium Section (2s delay, 50 items)"
-        color="yellow"
-      />
-      <DataSection
-        queryKey={[...slowDataKeys.section("slow")]}
-        title="Slow Section (5s delay, 100 items)"
-        color="orange"
-      />
-      <DataSection
-        queryKey={[...slowDataKeys.section("very-slow")]}
-        title="Very Slow Section (10s delay, 150 items)"
-        color="red"
-      />
+      <Suspense fallback={<SectionSkeleton label="Fast Section" />}>
+        <DataSection
+          queryKey={[...slowDataKeys.section("fast")]}
+          title="Fast Section (500ms delay, 10 items)"
+          color="green"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SectionSkeleton label="Medium Section" />}>
+        <DataSection
+          queryKey={[...slowDataKeys.section("medium")]}
+          title="Medium Section (2s delay, 50 items)"
+          color="yellow"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SectionSkeleton label="Slow Section" />}>
+        <DataSection
+          queryKey={[...slowDataKeys.section("slow")]}
+          title="Slow Section (5s delay, 100 items)"
+          color="orange"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SectionSkeleton label="Very Slow Section" />}>
+        <DataSection
+          queryKey={[...slowDataKeys.section("very-slow")]}
+          title="Very Slow Section (10s delay, 150 items)"
+          color="red"
+        />
+      </Suspense>
     </Flex>
   );
 }
