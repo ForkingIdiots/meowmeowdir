@@ -5,7 +5,15 @@ import { slowDataKeys } from "./keys";
 import { fetchSlowData, type SlowDataItem } from "./fetch-slow-data";
 import { Flex } from "@/components/Flex";
 import { Button } from "@/components/Button";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
+
+function HydratedTime({ timestamp }: { timestamp: number }) {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    setTime(new Date(timestamp).toLocaleTimeString());
+  }, [timestamp]);
+  return <>{time}</>;
+}
 
 function DataSection({
   queryKey,
@@ -45,7 +53,7 @@ function DataSection({
       </div>
       <p className="text-sm text-gray-600 mb-3">
         {data?.length ?? 0} items &middot; Hydrated at{" "}
-        {new Date(dataUpdatedAt).toLocaleTimeString()}
+        <HydratedTime timestamp={dataUpdatedAt} />
       </p>
       <div className="max-h-60 overflow-y-auto">
         <table className="w-full text-sm">
