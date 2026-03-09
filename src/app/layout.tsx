@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import { NuqsAdapter } from "nuqs/adapters/next";
+import { QueryProvider } from "@/providers/query-provider";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -49,8 +50,9 @@ export default function RootLayout({
 
               }}
             >
-              {children}
-
+              <QueryProvider>
+                {children}
+              </QueryProvider>
             </ConfigProvider>
           </AntdRegistry>
         </NuqsAdapter>
