@@ -6,16 +6,22 @@ import { Suspense } from "react";
 // Force dynamic rendering so streaming actually works
 export const dynamic = "force-dynamic";
 
-// Simulate slow data fetch with configurable delay
+function getBaseUrl() {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:${process.env.PORT || 3000}`;
+}
+
 async function fetchSlowData(count: number, delayMs: number, label: string) {
-  await new Promise((resolve) => setTimeout(resolve, delayMs));
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    name: `${label} Item ${i + 1}`,
-    value: Math.random().toFixed(4),
-    timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-    description: `This is a description for item ${i + 1} in the ${label} section. It contains some text to increase payload size.`,
-  }));
+  const params = new URLSearchParams({
+    count: String(count),
+    delayMs: String(delayMs),
+    label,
+  });
+  const res = await fetch(`${getBaseUrl()}/api/slow-data?${params}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to fetch slow data: ${res.statusText}`);
+  return res.json();
 }
 
 // ---- Streaming Components ----
@@ -27,6 +33,7 @@ async function FastSection() {
       title="Fast Section (500ms delay, 10 items)"
       data={data}
       color="green"
+      renderedAt={new Date().toLocaleTimeString()}
     />
   );
 }
@@ -38,6 +45,7 @@ async function MediumSection() {
       title="Medium Section (2s delay, 50 items)"
       data={data}
       color="yellow"
+      renderedAt={new Date().toLocaleTimeString()}
     />
   );
 }
@@ -49,6 +57,7 @@ async function SlowSection() {
       title="Slow Section (5s delay, 100 items)"
       data={data}
       color="orange"
+      renderedAt={new Date().toLocaleTimeString()}
     />
   );
 }
@@ -60,6 +69,7 @@ async function VerySlowSection() {
       title="Very Slow Section (10s delay, 150 items)"
       data={data}
       color="red"
+      renderedAt={new Date().toLocaleTimeString()}
     />
   );
 }
@@ -70,10 +80,12 @@ function StreamSection({
   title,
   data,
   color,
+  renderedAt,
 }: {
   title: string;
   data: { id: number; name: string; value: string; timestamp: string; description: string }[];
   color: string;
+  renderedAt: string;
 }) {
   const colorMap: Record<string, string> = {
     green: "border-green-500 bg-green-50",
@@ -86,7 +98,7 @@ function StreamSection({
     <div className={`border-2 rounded-2xl p-4 ${colorMap[color] ?? "border-gray-300"}`}>
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
       <p className="text-sm text-gray-600 mb-3">
-        Loaded {data.length} items &middot; Rendered at {new Date().toLocaleTimeString()}
+        Loaded {data.length} items &middot; Rendered at {renderedAt}
       </p>
       <div className="max-h-60 overflow-y-auto">
         <table className="w-full text-sm">
@@ -196,6 +208,7 @@ async function WaterfallSection() {
   const verySlow = await fetchSlowData(150, 10000, "WF-Very-Slow");
 
   const total = fast.length + medium.length + slow.length + verySlow.length;
+  const renderedAt = new Date().toLocaleTimeString();
 
   return (
     <div className="border-2 border-purple-500 bg-purple-50 rounded-2xl p-4">
@@ -204,7 +217,7 @@ async function WaterfallSection() {
       </h3>
       <p className="text-sm text-gray-600">
         All {total} items loaded sequentially. Total wait: ~17.5s. Rendered at{" "}
-        {new Date().toLocaleTimeString()}
+        {renderedAt}
       </p>
       <p className="text-sm text-purple-700 mt-2 font-medium">
         On AWS Lambda, this would likely timeout with default settings (10-30s).

@@ -22,7 +22,8 @@ function DataSection({
   delayMs: number;
   label: string;
 }) {
-  const { data, isFetching, dataUpdatedAt, refetch } = useSuspenseQuery<SlowDataItem[]>({
+  const queryClient = useQueryClient();
+  const { data, dataUpdatedAt } = useSuspenseQuery<SlowDataItem[]>({
     queryKey,
     queryFn: () => fetchSlowData(count, delayMs, label),
   });
@@ -38,14 +39,9 @@ function DataSection({
     <div className={`border-2 rounded-2xl p-4 ${colorMap[color] ?? "border-gray-300"}`}>
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-semibold text-lg">{title}</h3>
-        <div className="flex items-center gap-2">
-          {isFetching && (
-            <span className="text-xs text-gray-500 animate-pulse">Refetching...</span>
-          )}
-          <Button size="small" onClick={() => refetch()}>
-            Refetch
-          </Button>
-        </div>
+        <Button size="small" onClick={() => queryClient.resetQueries({ queryKey })}>
+          Refetch
+        </Button>
       </div>
       <p className="text-sm text-gray-600 mb-3">
         {data?.length ?? 0} items &middot; Hydrated at{" "}
@@ -99,7 +95,7 @@ export function StreamSections() {
       <div className="flex justify-end">
         <Button
           onClick={() =>
-            queryClient.invalidateQueries({ queryKey: slowDataKeys.all })
+            queryClient.resetQueries({ queryKey: slowDataKeys.all })
           }
         >
           Refetch All Sections
