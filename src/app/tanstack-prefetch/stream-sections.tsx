@@ -2,7 +2,7 @@
 
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { slowDataKeys } from "./keys";
-import { type SlowDataItem } from "./fetch-slow-data";
+import { fetchSlowData, type SlowDataItem } from "./fetch-slow-data";
 import { Flex } from "@/components/Flex";
 import { Button } from "@/components/Button";
 import { Suspense } from "react";
@@ -11,13 +11,20 @@ function DataSection({
   queryKey,
   title,
   color,
+  count,
+  delayMs,
+  label,
 }: {
   queryKey: readonly string[];
   title: string;
   color: string;
+  count: number;
+  delayMs: number;
+  label: string;
 }) {
   const { data, isFetching, dataUpdatedAt, refetch } = useSuspenseQuery<SlowDataItem[]>({
     queryKey,
+    queryFn: () => fetchSlowData(count, delayMs, label),
   });
 
   const colorMap: Record<string, string> = {
@@ -104,6 +111,9 @@ export function StreamSections() {
           queryKey={[...slowDataKeys.section("fast")]}
           title="Fast Section (500ms delay, 10 items)"
           color="green"
+          count={10}
+          delayMs={500}
+          label="Fast"
         />
       </Suspense>
 
@@ -112,6 +122,9 @@ export function StreamSections() {
           queryKey={[...slowDataKeys.section("medium")]}
           title="Medium Section (2s delay, 50 items)"
           color="yellow"
+          count={50}
+          delayMs={2000}
+          label="Medium"
         />
       </Suspense>
 
@@ -120,6 +133,9 @@ export function StreamSections() {
           queryKey={[...slowDataKeys.section("slow")]}
           title="Slow Section (5s delay, 100 items)"
           color="orange"
+          count={100}
+          delayMs={5000}
+          label="Slow"
         />
       </Suspense>
 
@@ -128,6 +144,9 @@ export function StreamSections() {
           queryKey={[...slowDataKeys.section("very-slow")]}
           title="Very Slow Section (10s delay, 150 items)"
           color="red"
+          count={150}
+          delayMs={10000}
+          label="Very Slow"
         />
       </Suspense>
     </Flex>
