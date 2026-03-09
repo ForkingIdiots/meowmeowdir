@@ -7,15 +7,26 @@ import { NextServerSearchParams } from "@/types";
 import { Suspense } from "react";
 
 
+const CatsTableSkeleton = () => (
+  <div className="grid grid-cols-4 gap-4">
+    {Array.from({ length: 8 }).map((_, i) => {
+      return (
+        <div className="col-span-1 aspect-video w-full rounded bg-neutral-200 animate-pulse" key={i} />
+
+      )
+    })}
+  </div>
+)
+
 export default function Home({ searchParams }: { searchParams?: NextServerSearchParams }) {
   const tags = searchParams?.[StateParams.tags]
-  console.log('tags', tags)
+  const key = Array.isArray(tags) ? tags.join(',') : tags
   return (
     <div className="">
       <Flex gap={8} vertical>
         <HeadingTitle />
         <TagsDisplay />
-        <Suspense fallback='loading'>
+        <Suspense fallback={<CatsTableSkeleton />} key={key}>
           <CatsTable tags={tags} />
         </Suspense>
 
