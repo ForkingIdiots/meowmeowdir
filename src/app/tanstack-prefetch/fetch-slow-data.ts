@@ -6,17 +6,25 @@ export type SlowDataItem = {
   description: string;
 };
 
+function getBaseUrl() {
+  if (typeof window !== "undefined") return "";
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:${process.env.PORT || 3000}`;
+}
+
 export async function fetchSlowData(
   count: number,
   delayMs: number,
   label: string
 ): Promise<SlowDataItem[]> {
-  await new Promise((resolve) => setTimeout(resolve, delayMs));
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    name: `${label} Item ${i + 1}`,
-    value: Math.random().toFixed(4),
-    timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-    description: `This is a description for item ${i + 1} in the ${label} section. It contains some text to increase payload size.`,
-  }));
+  const params = new URLSearchParams({
+    count: String(count),
+    delayMs: String(delayMs),
+    label,
+  });
+  const res = await fetch(`${getBaseUrl()}/api/slow-data?${params}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to fetch slow data: ${res.statusText}`);
+  return res.json();
 }
