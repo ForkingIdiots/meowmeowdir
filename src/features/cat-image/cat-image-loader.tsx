@@ -1,11 +1,22 @@
-import { serverAction } from "@/services/action"
+'use client'
+import { useServerAction } from "@/services/useServerAction"
+import { useEffect, useState } from "react"
 
 export const CatImageLoader = async ({ id }: { id: string }) => {
+    const [blob, setBlob] = useState<Blob | null>(null)
+    const { fetch } = useServerAction('getCatById')
 
-    const { data } = await serverAction['getCatById'](id)
-    console.log(data)
-
+    useEffect(() => {
+        const getImage = async () => {
+            const response = await fetch(id)
+            if (response.ok) {
+                setBlob(await response.blob())
+            }
+        }
+        getImage()
+    }, [])
+    if (!blob) return 'no image'
     return (
-        <div className="">image {id}</div>
+        null
     )
 }

@@ -13,3 +13,7 @@ export const getCats = async (query?: GetCatsParams) => {
 export const getCatById = async (id: string) => {
     return await api.GET('/cat/{id}', { params: { path: { id } } })
 }
+
+export const getTags = async () => {
+    return await api.GET('/api/tags')
+}

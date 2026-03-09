@@ -9,6 +9,9 @@ export async function POST(request: NextRequest) {
     const searchParams = new URLSearchParams(request.nextUrl.searchParams)
     const actionName = searchParams.get('actionName') || ''
 
+    if (!actionName) {
+        return NextResponse.json({ status: 400, error: 'Missing actionName' })
+    }
     try {
         const action = serverAction[actionName as ServerActionName] as (arg0: any) => Promise<ServerActionResponse>
         const response = await action(request.body)

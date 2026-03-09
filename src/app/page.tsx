@@ -1,17 +1,25 @@
 import { Flex } from "@/components/Flex";
-import { Title } from "@/components/Title";
 import { CatsTable } from "@/features/cats-table";
 import { HeadingTitle } from "@/features/heading-title";
-import Image from "next/image";
+import { TagsDisplay } from "@/features/tags-display/display";
+import { StateParams } from "@/libs/nuqs";
+import { NextServerSearchParams } from "@/types";
 import { Suspense } from "react";
 
-export default function Home() {
+
+export default function Home({ searchParams }: { searchParams?: NextServerSearchParams }) {
+  const tags = searchParams?.[StateParams.tags]
+  console.log('tags', tags)
   return (
     <div className="">
-      <HeadingTitle />
-      <Suspense fallback='loading'>
-        <CatsTable />
-      </Suspense>
+      <Flex gap={8} vertical>
+        <HeadingTitle />
+        <TagsDisplay />
+        <Suspense fallback='loading'>
+          <CatsTable tags={tags} />
+        </Suspense>
+
+      </Flex>
     </div>
   );
 }
