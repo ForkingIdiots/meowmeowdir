@@ -73,22 +73,22 @@ async function PrefetchedSections() {
 
   // Start prefetches WITHOUT awaiting — promises are passed to the client
   // Each useSuspenseQuery on the client will suspend until its query resolves
-  void queryClient.prefetchQuery({
-    queryKey: slowDataKeys.section("fast"),
-    queryFn: () => fetchSlowData(10, 500, "Fast"),
-  });
-  void queryClient.prefetchQuery({
-    queryKey: slowDataKeys.section("medium"),
-    queryFn: () => fetchSlowData(50, 2000, "Medium"),
-  });
-  void queryClient.prefetchQuery({
-    queryKey: slowDataKeys.section("slow"),
-    queryFn: () => fetchSlowData(100, 5000, "Slow"),
-  });
-  void queryClient.prefetchQuery({
-    queryKey: slowDataKeys.section("very-slow"),
-    queryFn: () => fetchSlowData(150, 10000, "Very Slow"),
-  });
+  // void queryClient.prefetchQuery({
+  //   queryKey: slowDataKeys.section("fast"),
+  //   queryFn: () => fetchSlowData(10, 500, "Fast"),
+  // });
+  // void queryClient.prefetchQuery({
+  //   queryKey: slowDataKeys.section("medium"),
+  //   queryFn: () => fetchSlowData(50, 2000, "Medium"),
+  // });
+  // void queryClient.prefetchQuery({
+  //   queryKey: slowDataKeys.section("slow"),
+  //   queryFn: () => fetchSlowData(100, 5000, "Slow"),
+  // });
+  // void queryClient.prefetchQuery({
+  //   queryKey: slowDataKeys.section("very-slow"),
+  //   queryFn: () => fetchSlowData(150, 10000, "Very Slow"),
+  // });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
